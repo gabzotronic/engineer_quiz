@@ -15,7 +15,7 @@ class Settings(BaseSettings):
         "Systems Engineer",
     ]
 
-    model_config = {"env_file": ".env", "env_prefix": "QUIZ_"}
+    model_config = {"env_file": ".env", "env_prefix": "QUIZ_", "extra": "ignore"}
 
 
 settings = Settings()

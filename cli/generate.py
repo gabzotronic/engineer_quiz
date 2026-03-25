@@ -223,6 +223,34 @@ async def run_generation(
 
     typer.echo(f"\nDone. Generated and stored {len(all_questions)} questions from {len(new_chunks)} chunks.")
 
+    # Export full question bank to data/questions.json
+    await export_questions_json(db_path)
+
+
+async def export_questions_json(db_path: str) -> None:
+    """Export all questions from DB to data/questions.json for version control."""
+    data_dir = Path(__file__).resolve().parent.parent / "data"
+    data_dir.mkdir(exist_ok=True)
+
+    async with aiosqlite.connect(db_path) as db:
+        db.row_factory = aiosqlite.Row
+        cursor = await db.execute(
+            "SELECT book, chapter, chunk_hash, question_type, difficulty, roles, "
+            "question_text, options, correct_answer, explanation FROM questions ORDER BY id"
+        )
+        rows = await cursor.fetchall()
+
+    questions = []
+    for r in rows:
+        q = dict(r)
+        q["roles"] = json.loads(q["roles"])
+        q["options"] = json.loads(q["options"]) if q["options"] else None
+        questions.append(q)
+
+    out = data_dir / "questions.json"
+    out.write_text(json.dumps(questions, indent=2) + "\n")
+    typer.echo(f"Exported {len(questions)} questions to {out}")
+
 
 @app.command()
 def generate(
@@ -247,6 +275,14 @@ def generate(
         questions_per_chunk=questions_per_chunk,
         dry_run=dry_run,
     ))
+
+
+@app.command()
+def export(
+    db_path: str = typer.Option("quiz.db", envvar="QUIZ_DATABASE_PATH"),
+) -> None:
+    """Export all questions from DB to data/questions.json."""
+    asyncio.run(export_questions_json(db_path))
 
 
 if __name__ == "__main__":

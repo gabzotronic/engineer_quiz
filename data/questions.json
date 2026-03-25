@@ -1,0 +1,276 @@
+[
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Systems Engineering",
+    "question_type": "mc",
+    "difficulty": 1,
+    "roles": [
+      "Systems Engineer",
+      "Project Manager",
+      "Software Engineer",
+      "QA Engineer",
+      "AOCS Engineer"
+    ],
+    "question_text": "Which of the following best describes the primary purpose of systems engineering?",
+    "options": [
+      "A) To write software for spacecraft",
+      "B) To ensure all subsystems work together to meet mission requirements",
+      "C) To design the propulsion system",
+      "D) To manage the project budget"
+    ],
+    "correct_answer": "B",
+    "explanation": "Systems engineering focuses on the integration of all subsystems and ensuring the complete system satisfies the mission requirements."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Astrodynamics",
+    "question_type": "mc",
+    "difficulty": 2,
+    "roles": [
+      "AOCS Engineer",
+      "Systems Engineer"
+    ],
+    "question_text": "In the vis-viva equation v\u00b2 = \u03bc(2/r - 1/a), what does 'a' represent?",
+    "options": [
+      "A) The altitude above Earth's surface",
+      "B) The semi-major axis of the orbit",
+      "C) The acceleration due to gravity",
+      "D) The apoapsis distance"
+    ],
+    "correct_answer": "B",
+    "explanation": "In the vis-viva equation, 'a' is the semi-major axis, which defines the size of the orbit and directly relates to the orbital energy."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Astrodynamics",
+    "question_type": "mc",
+    "difficulty": 3,
+    "roles": [
+      "AOCS Engineer",
+      "Systems Engineer"
+    ],
+    "question_text": "For a hyperbolic trajectory, which statement is correct?",
+    "options": [
+      "A) The eccentricity is less than 1",
+      "B) The specific energy is negative",
+      "C) The eccentricity is greater than 1 and the semi-major axis is negative",
+      "D) The semi-major axis equals the radius of periapsis"
+    ],
+    "correct_answer": "C",
+    "explanation": "For a hyperbolic orbit, e > 1 and the specific energy E > 0, which requires a < 0 from the energy equation E = -\u03bc/(2a)."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Power Systems",
+    "question_type": "mc",
+    "difficulty": 1,
+    "roles": [
+      "Systems Engineer",
+      "Project Manager",
+      "Software Engineer"
+    ],
+    "question_text": "What is the primary effect of increasing temperature on solar cell performance?",
+    "options": [
+      "A) Efficiency increases",
+      "B) Efficiency decreases",
+      "C) No effect on efficiency",
+      "D) Current output drops to zero"
+    ],
+    "correct_answer": "B",
+    "explanation": "Solar cell efficiency decreases with increasing temperature. Every precaution is taken to keep operating temperature low in spacecraft solar arrays."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Structures",
+    "question_type": "mc",
+    "difficulty": 2,
+    "roles": [
+      "Systems Engineer",
+      "QA Engineer"
+    ],
+    "question_text": "In structural design, what does the interaction formula Rc + Rs\u00b2 = 1 describe?",
+    "options": [
+      "A) Biaxial compression loading",
+      "B) Longitudinal compression and shear combined loading",
+      "C) Pure bending and torsion",
+      "D) Thermal stress interaction"
+    ],
+    "correct_answer": "B",
+    "explanation": "The interaction formula Rc + Rs\u00b2 = 1 is used for plates under combined longitudinal compression and shear loading."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Communications",
+    "question_type": "mc",
+    "difficulty": 1,
+    "roles": [
+      "Software Engineer",
+      "Systems Engineer"
+    ],
+    "question_text": "In the AX.25 protocol used in amateur satellite communications, what is the purpose of the FCS field?",
+    "options": [
+      "A) Frame control sequencing",
+      "B) Error detection",
+      "C) Frequency channel selection",
+      "D) Data encryption"
+    ],
+    "correct_answer": "B",
+    "explanation": "The Frame Check Sequence (FCS) field provides error detection in the AX.25 protocol frame."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Systems Engineering",
+    "question_type": "mc",
+    "difficulty": 2,
+    "roles": [
+      "Project Manager",
+      "QA Engineer",
+      "Systems Engineer"
+    ],
+    "question_text": "According to EIA/IS-731, which three capability categories are defined in the systems engineering capability model?",
+    "options": [
+      "A) Design, Testing, Deployment",
+      "B) Technical, Management, Environment",
+      "C) Hardware, Software, Integration",
+      "D) Planning, Execution, Verification"
+    ],
+    "correct_answer": "B",
+    "explanation": "EIA/IS-731 defines three capability categories: technical (producing the deliverable), management (planning, control, information management), and environment (supporting infrastructure)."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Astrodynamics",
+    "question_type": "open",
+    "difficulty": 2,
+    "roles": [
+      "AOCS Engineer",
+      "Systems Engineer"
+    ],
+    "question_text": "Explain the significance of the J2 perturbation on low Earth orbit satellites and how it affects the orbital plane.",
+    "options": null,
+    "correct_answer": "The J2 perturbation is caused by Earth's oblateness (equatorial bulge). For LEO satellites, it causes the right ascension of the ascending node (RAAN) to precess, meaning the orbital plane rotates around Earth's axis. The rate of precession depends on the orbital inclination and altitude. This effect is exploited in sun-synchronous orbits where the RAAN precession rate matches the Earth's orbital rate around the Sun.",
+    "explanation": "J2 is the dominant perturbation for LEO spacecraft and must be accounted for in mission design."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Systems Engineering",
+    "question_type": "open",
+    "difficulty": 1,
+    "roles": [
+      "Project Manager",
+      "QA Engineer",
+      "Systems Engineer",
+      "Software Engineer"
+    ],
+    "question_text": "Describe three benefits of applying good systems engineering practices to a space mission development project.",
+    "options": null,
+    "correct_answer": "Good systems engineering practices provide: (1) Reduced development time through better planning and coordination, (2) Improved satisfaction of requirements by ensuring traceability and verification throughout the lifecycle, and (3) Reduced total life-cycle costs by identifying and resolving issues early rather than during integration or operations. Additional benefits include enhanced system quality and reliability, reduced schedule risk, and improved ability to maintain and upgrade the system.",
+    "explanation": "These benefits are well-documented in systems engineering standards such as EIA/IS-731."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Power Systems",
+    "question_type": "open",
+    "difficulty": 3,
+    "roles": [
+      "Systems Engineer",
+      "AOCS Engineer"
+    ],
+    "question_text": "A power system uses multijunction solar cells. Explain why calibrating a solar simulator for MJ cells requires special procedures compared to single-junction cells.",
+    "options": null,
+    "correct_answer": "Multijunction (MJ) solar cells consist of multiple semiconductor junctions stacked on top of each other, each responding to different wavelength ranges of the solar spectrum. Unlike single-junction cells which can be calibrated with a single standard reference cell, MJ cells require calibrated individual junction versions of the MJ cell to calibrate the light source to the correct spectrum for each individual junction. A standard xenon lamp filtered to match solar spectral distribution may not correctly represent the spectrum for all junctions simultaneously.",
+    "explanation": "This is critical for accurate ground testing of spacecraft solar arrays using multijunction technology."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Structures",
+    "question_type": "mc",
+    "difficulty": 2,
+    "roles": [
+      "QA Engineer",
+      "Systems Engineer"
+    ],
+    "question_text": "When estimating mass margins for a space system, which component type typically requires the largest mass margin factor?",
+    "options": [
+      "A) Off-the-shelf hardware with known mass",
+      "B) Minor modifications of existing designs",
+      "C) New conceptual designs with estimated mass",
+      "D) Electrical wiring with measured mass"
+    ],
+    "correct_answer": "C",
+    "explanation": "New conceptual designs carry the most uncertainty, so they require the largest mass margin factors compared to heritage or modified hardware."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Communications",
+    "question_type": "mc",
+    "difficulty": 2,
+    "roles": [
+      "Software Engineer",
+      "Systems Engineer"
+    ],
+    "question_text": "In the AX.25 protocol, what mechanism prevents flag patterns from appearing in the data field?",
+    "options": [
+      "A) Data encryption",
+      "B) Bit stuffing \u2014 inserting a 0 after every five consecutive 1s",
+      "C) Manchester encoding",
+      "D) Byte-level checksums"
+    ],
+    "correct_answer": "B",
+    "explanation": "AX.25 uses bit stuffing to prevent the flag pattern (01111110) from appearing in the information field by inserting a 0 after every five sequences of ones."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Astrodynamics",
+    "question_type": "mc",
+    "difficulty": 1,
+    "roles": [
+      "AOCS Engineer",
+      "Systems Engineer",
+      "Software Engineer"
+    ],
+    "question_text": "What defines a geostationary orbit (GEO)?",
+    "options": [
+      "A) An orbit with zero inclination at any altitude",
+      "B) A circular orbit at ~35,786 km altitude with zero inclination and period matching Earth's rotation",
+      "C) Any orbit with a 24-hour period",
+      "D) A highly elliptical orbit with apogee over a fixed point"
+    ],
+    "correct_answer": "B",
+    "explanation": "A geostationary orbit is specifically a circular, equatorial orbit at approximately 35,786 km altitude where the orbital period matches Earth's sidereal rotation period of ~23h 56m."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Systems Engineering",
+    "question_type": "open",
+    "difficulty": 2,
+    "roles": [
+      "Project Manager",
+      "QA Engineer"
+    ],
+    "question_text": "Explain the concept of 'earned value management' (EVM) and why it is important for space system development projects.",
+    "options": null,
+    "correct_answer": "Earned Value Management (EVM) is a project management technique that integrates scope, schedule, and cost measurements to assess project performance and progress. It compares planned work (budgeted cost of work scheduled) with work actually completed (budgeted cost of work performed) and actual costs incurred. EVM is important for space system development because these projects are typically long-duration, high-cost, and carry significant technical risk. EVM provides early warning indicators of cost overruns and schedule delays, enabling corrective action before problems become critical.",
+    "explanation": "EVM is a standard practice in aerospace project management referenced in systems engineering standards."
+  },
+  {
+    "book": "Fundamentals of Space Systems",
+    "chapter": "Power Systems",
+    "question_type": "mc",
+    "difficulty": 2,
+    "roles": [
+      "Systems Engineer",
+      "AOCS Engineer",
+      "Software Engineer"
+    ],
+    "question_text": "How does sunlight intensity vary with distance from the Sun, and what effect does this have on solar cell output?",
+    "options": [
+      "A) Linearly with distance; current decreases linearly",
+      "B) Inversely with the square of distance; current and power density are directly proportional to intensity",
+      "C) Exponentially with distance; voltage drops exponentially",
+      "D) It doesn't vary significantly within the inner solar system"
+    ],
+    "correct_answer": "B",
+    "explanation": "Solar intensity follows the inverse square law. Current and power density of solar cells are directly proportional to normal incident sunlight intensity. Voltage varies only slightly with intensity changes."
+  }
+]
