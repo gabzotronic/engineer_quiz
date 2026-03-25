@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Quiz — {{ role }}{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">{{ role }} Quiz</h1>
+        <span class="text-gray-400">{{ questions|length }} questions</span>
+    </div>
+
+    <form action="/quiz/{{ quiz_id }}/submit" method="POST" class="space-y-6" id="quiz-form">
+        {% for q in questions %}
+        <div class="border border-gray-800 rounded-lg p-6 space-y-4">
+            <div class="flex items-start gap-3">
+                <span class="bg-gray-800 text-gray-300 rounded-full w-8 h-8 flex items-center justify-center text-sm font-medium shrink-0">
+                    {{ loop.index }}
+                </span>
+                <div class="space-y-1 flex-1">
+                    <div class="flex items-center gap-2">
+                        {% if q.difficulty == 1 %}
+                        <span class="text-xs bg-green-900/50 text-green-400 px-2 py-0.5 rounded">Basic</span>
+                        {% elif q.difficulty == 2 %}
+                        <span class="text-xs bg-yellow-900/50 text-yellow-400 px-2 py-0.5 rounded">Intermediate</span>
+                        {% else %}
+                        <span class="text-xs bg-red-900/50 text-red-400 px-2 py-0.5 rounded">Advanced</span>
+                        {% endif %}
+                        <span class="text-xs text-gray-500">{{ q.question_type|upper }}</span>
+                    </div>
+                    <p class="text-gray-100 leading-relaxed">{{ q.question_text }}</p>
+                </div>
+            </div>
+
+            {% if q.question_type == "mc" and q.options %}
+            <div class="ml-11 space-y-2">
+                {% for opt in q.options %}
+                <label class="flex items-start gap-3 cursor-pointer group">
+                    <input type="radio" name="q_{{ q.id }}" value="{{ opt[0] }}"
+                           class="mt-1 accent-blue-500">
+                    <span class="text-gray-300 group-hover:text-gray-100 transition">{{ opt }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="ml-11">
+                <textarea name="q_{{ q.id }}" rows="4"
+                          placeholder="Type your answer here..."
+                          class="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-gray-100
+                                 focus:border-blue-500 focus:outline-none resize-y"></textarea>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="flex justify-end pt-4">
+            <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-3 rounded-lg transition"
+                    id="submit-btn">
+                Submit Answers
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('quiz-form').addEventListener('submit', function() {
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Grading...';
+    btn.classList.add('opacity-50');
+});
+</script>
+{% endblock %}

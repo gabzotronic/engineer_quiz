@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Results — {{ role }}{% endblock %}
+{% block content %}
+<div class="space-y-6">
+    <div class="border border-gray-800 rounded-lg p-6 text-center space-y-2">
+        <h1 class="text-2xl font-bold">Quiz Results</h1>
+        <p class="text-gray-400">{{ role }}</p>
+        <div class="text-5xl font-bold {% if pct >= 70 %}text-green-400{% elif pct >= 50 %}text-yellow-400{% else %}text-red-400{% endif %}">
+            {{ pct }}%
+        </div>
+        <p class="text-gray-400">{{ total_correct }} of {{ total_answered }} correct</p>
+    </div>
+
+    {% for item in items %}
+    {% set q = item.question %}
+    {% set correct = item.is_correct == 1 %}
+    <div class="border rounded-lg p-6 space-y-4
+                {% if correct %}border-green-800/50 bg-green-950/20{% elif item.is_correct == 0 %}border-red-800/50 bg-red-950/20{% else %}border-gray-800{% endif %}">
+        <div class="flex items-start gap-3">
+            <span class="rounded-full w-8 h-8 flex items-center justify-center text-sm font-medium shrink-0
+                        {% if correct %}bg-green-900 text-green-300{% elif item.is_correct == 0 %}bg-red-900 text-red-300{% else %}bg-gray-800 text-gray-300{% endif %}">
+                {{ loop.index }}
+            </span>
+            <div class="space-y-2 flex-1">
+                <div class="flex items-center gap-2">
+                    {% if q.difficulty == 1 %}
+                    <span class="text-xs bg-green-900/50 text-green-400 px-2 py-0.5 rounded">Basic</span>
+                    {% elif q.difficulty == 2 %}
+                    <span class="text-xs bg-yellow-900/50 text-yellow-400 px-2 py-0.5 rounded">Intermediate</span>
+                    {% else %}
+                    <span class="text-xs bg-red-900/50 text-red-400 px-2 py-0.5 rounded">Advanced</span>
+                    {% endif %}
+                    {% if correct %}
+                    <span class="text-xs text-green-400">Correct</span>
+                    {% elif item.is_correct == 0 %}
+                    <span class="text-xs text-red-400">Incorrect</span>
+                    {% endif %}
+                    {% if item.score is not none %}
+                    <span class="text-xs text-blue-400">Score: {{ (item.score * 100)|round|int }}%</span>
+                    {% endif %}
+                </div>
+                <p class="text-gray-100 leading-relaxed">{{ q.question_text }}</p>
+
+                {% if q.question_type == "mc" and q.options %}
+                <div class="space-y-1 text-sm">
+                    {% for opt in q.options %}
+                    <div class="{% if opt[0] == q.correct_answer %}text-green-400 font-medium{% elif opt[0] == item.user_answer %}text-red-400{% else %}text-gray-500{% endif %}">
+                        {{ opt }}
+                        {% if opt[0] == q.correct_answer and opt[0] != item.user_answer %} &larr; correct{% endif %}
+                        {% if opt[0] == item.user_answer and opt[0] != q.correct_answer %} &larr; your answer{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-sm space-y-2">
+                    <div>
+                        <span class="text-gray-500">Your answer:</span>
+                        <p class="text-gray-300 mt-1">{{ item.user_answer or "(no answer)" }}</p>
+                    </div>
+                    {% if item.feedback %}
+                    <div>
+                        <span class="text-gray-500">Feedback:</span>
+                        <p class="text-blue-300 mt-1">{{ item.feedback }}</p>
+                    </div>
+                    {% endif %}
+                    <details class="mt-2">
+                        <summary class="text-gray-500 cursor-pointer hover:text-gray-300 text-sm">Show model answer</summary>
+                        <p class="text-gray-400 mt-2">{{ q.correct_answer }}</p>
+                    </details>
+                </div>
+                {% endif %}
+
+                {% if q.explanation %}
+                <details class="mt-2">
+                    <summary class="text-gray-500 cursor-pointer hover:text-gray-300 text-sm">Explanation</summary>
+                    <p class="text-gray-400 mt-2">{{ q.explanation }}</p>
+                </details>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="flex justify-center pt-4 pb-8">
+        <a href="/"
+           class="bg-gray-800 hover:bg-gray-700 text-white font-medium px-8 py-3 rounded-lg transition">
+            Take Another Quiz
+        </a>
+    </div>
+</div>
+{% endblock %}

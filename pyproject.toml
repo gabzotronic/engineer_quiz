@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "engineer-quiz"
+version = "0.1.0"
+description = "Knowledge quiz webapp for satellite engineers"
+packages = [{include = "src"}, {include = "cli"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.115"
+uvicorn = {extras = ["standard"], version = "^0.34"}
+jinja2 = "^3.1"
+aiosqlite = "^0.20"
+httpx = "^0.28"
+pydantic-settings = "^2.0"
+python-dotenv = "^1.0"
+pymupdf = "^1.25"
+typer = "^0.15"
+python-multipart = "^0.0.22"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-asyncio = "^0.24"
+black = "^24.0"
+isort = "^5.13"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
