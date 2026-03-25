@@ -6,6 +6,7 @@ import json
 import sys
 from pathlib import Path
 
+import aiosqlite
 import httpx
 import typer
 
@@ -13,15 +14,22 @@ app = typer.Typer()
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-DEFAULT_ROLES = [
-    "Software Engineer",
-    "QA Engineer",
-    "AOCS Engineer",
-    "Project Manager",
-    "Systems Engineer",
-]
+ROLES_FILE = Path(__file__).resolve().parent.parent / "data" / "roles.json"
+
+
+def load_roles() -> list[dict]:
+    return json.loads(ROLES_FILE.read_text())
+
+
+def format_roles_for_prompt(roles: list[dict]) -> str:
+    lines = []
+    for r in roles:
+        lines.append(f"- {r['name']}: focuses on {r['focus']}. Cares about: {r['cares_about']}")
+    return "\n".join(lines)
 
 GENERATION_PROMPT = """You are creating quiz questions for satellite engineers studying "{book_title}", {chapter}.
+
+The purpose of this quiz is to test whether engineers truly understand satellite engineering concepts, reasoning, and trade-offs — NOT to test rote memorisation of facts, definitions, or numerical values.
 
 Source text:
 ---
@@ -30,10 +38,15 @@ Source text:
 
 Generate exactly {n_questions} questions from this text.
 - Create {n_mc} multiple-choice questions and {n_open} open-ended questions.
-- Tag each question with the most relevant engineer roles from: {roles_list}
-- Assign difficulty: 1 (recall/definition), 2 (application/analysis), 3 (synthesis/evaluation)
-- For multiple-choice: provide exactly 4 options (A-D), mark the correct one letter, explain why
-- For open-ended: provide a model answer (2-3 sentences) and explain key points
+- Tag each question with the most relevant engineer roles from the list below. Consider each role's focus area when deciding relevance:
+{roles_block}
+- Assign difficulty: 1 (conceptual understanding), 2 (application/trade-off analysis), 3 (cross-domain synthesis)
+
+Question style guidelines:
+- DO NOT ask for definitions ("What is X?"), specific numerical values, or facts that can simply be looked up.
+- Questions should require the engineer to demonstrate understanding of WHY something works the way it does, what trade-offs are involved, or what would happen under different conditions.
+- For multiple-choice: provide exactly 4 options (A-D). Each wrong option should be plausible enough that reasoning is needed to eliminate it — not obviously wrong. Mark the correct letter and explain the reasoning.
+- For open-ended: provide a model answer (3-5 sentences) that outlines the reasoning chain, key concepts, and trade-offs the answer should demonstrate. Focus on WHY, not just WHAT.
 
 If the source text is too short, contains mostly figures/tables references, or is not suitable for questions, return an empty array [].
 
@@ -53,8 +66,8 @@ Respond ONLY with a JSON array (no markdown, no code fences):
     "difficulty": 3,
     "roles": ["Project Manager"],
     "question_text": "...",
-    "correct_answer": "Model answer...",
-    "explanation": "Key points: ..."
+    "correct_answer": "Model answer explaining the reasoning chain and key concepts...",
+    "explanation": "Key concepts and trade-offs the answer should demonstrate: ..."
   }}
 ]"""
 
@@ -91,11 +104,11 @@ async def generate_for_chunk(
     chunk: dict,
     api_key: str,
     model: str,
-    roles: list[str],
+    roles: list[dict],
     n_questions: int = 5,
     semaphore: asyncio.Semaphore | None = None,
 ) -> list[dict]:
-    n_mc = max(1, n_questions - 2)
+    n_mc = round(n_questions * 0.7)
     n_open = n_questions - n_mc
 
     prompt = GENERATION_PROMPT.format(
@@ -105,7 +118,7 @@ async def generate_for_chunk(
         n_questions=n_questions,
         n_mc=n_mc,
         n_open=n_open,
-        roles_list=", ".join(roles),
+        roles_block=format_roles_for_prompt(roles),
     )
 
     if semaphore:
@@ -151,14 +164,12 @@ async def run_generation(
     api_key: str,
     model: str,
     db_path: str,
-    roles: list[str],
+    roles: list[dict],
     chunk_limit: int,
     concurrency: int,
     questions_per_chunk: int,
     dry_run: bool,
 ) -> None:
-    import aiosqlite
-
     chunks = json.loads(chunks_file.read_text())
     if chunk_limit > 0:
         chunks = chunks[:chunk_limit]
@@ -212,7 +223,7 @@ async def run_generation(
                         q.get("chunk_hash"),
                         q.get("question_type", "mc"),
                         q.get("difficulty", 1),
-                        json.dumps(q.get("roles", roles)),
+                        json.dumps(q.get("roles", [r["name"] for r in roles])),
                         q["question_text"],
                         json.dumps(q.get("options")) if q.get("options") else None,
                         q.get("correct_answer", ""),
@@ -269,7 +280,7 @@ def generate(
         api_key=api_key,
         model=model,
         db_path=db_path,
-        roles=DEFAULT_ROLES,
+        roles=load_roles(),
         chunk_limit=chunk_limit,
         concurrency=concurrency,
         questions_per_chunk=questions_per_chunk,

@@ -15,34 +15,66 @@ router = APIRouter(prefix="/quiz")
 
 
 @router.get("/start")
-async def start_quiz(request: Request, role: str, book: str = ""):
+async def start_quiz(
+    request: Request,
+    role: str = "",
+    chapter: str = "",
+    book: str = "",
+):
+    filter_type = "chapter" if chapter else "role"
+    filter_value = chapter if chapter else role
+
+    if not filter_value:
+        return RedirectResponse(url="/", status_code=303)
+
     db = await get_db()
     try:
-        if book:
-            cursor = await db.execute(
-                """SELECT * FROM questions
-                   WHERE EXISTS (SELECT 1 FROM json_each(roles) WHERE value = ?)
-                   AND book = ?
-                   ORDER BY RANDOM() LIMIT ?""",
-                (role, book, settings.quiz_size),
-            )
+        if filter_type == "chapter":
+            if book:
+                cursor = await db.execute(
+                    """SELECT * FROM questions
+                       WHERE chapter = ? AND book = ?
+                       ORDER BY RANDOM() LIMIT ?""",
+                    (filter_value, book, settings.quiz_size),
+                )
+            else:
+                cursor = await db.execute(
+                    """SELECT * FROM questions
+                       WHERE chapter = ?
+                       ORDER BY RANDOM() LIMIT ?""",
+                    (filter_value, settings.quiz_size),
+                )
         else:
-            cursor = await db.execute(
-                """SELECT * FROM questions
-                   WHERE EXISTS (SELECT 1 FROM json_each(roles) WHERE value = ?)
-                   ORDER BY RANDOM() LIMIT ?""",
-                (role, settings.quiz_size),
-            )
+            if book:
+                cursor = await db.execute(
+                    """SELECT * FROM questions
+                       WHERE EXISTS (SELECT 1 FROM json_each(roles) WHERE value = ?)
+                       AND book = ?
+                       ORDER BY RANDOM() LIMIT ?""",
+                    (filter_value, book, settings.quiz_size),
+                )
+            else:
+                cursor = await db.execute(
+                    """SELECT * FROM questions
+                       WHERE EXISTS (SELECT 1 FROM json_each(roles) WHERE value = ?)
+                       ORDER BY RANDOM() LIMIT ?""",
+                    (filter_value, settings.quiz_size),
+                )
         rows = await cursor.fetchall()
 
         if not rows:
+            cursor = await db.execute(
+                "SELECT DISTINCT chapter FROM questions WHERE chapter IS NOT NULL ORDER BY chapter"
+            )
+            chapters = [row["chapter"] for row in await cursor.fetchall()]
             return request.app.state.templates.TemplateResponse(
                 "home.html",
                 {
                     "request": request,
                     "roles": settings.roles,
                     "books": [],
-                    "error": f"No questions available for role '{role}'. Try a different role or book.",
+                    "chapters": chapters,
+                    "error": f"No questions available for {filter_type} '{filter_value}'. Try a different selection.",
                 },
             )
 
@@ -51,8 +83,8 @@ async def start_quiz(request: Request, role: str, book: str = ""):
         question_ids = json.dumps([q.id for q in questions])
 
         await db.execute(
-            "INSERT INTO quizzes (id, role, book, question_ids) VALUES (?, ?, ?, ?)",
-            (quiz_id, role, book or None, question_ids),
+            "INSERT INTO quizzes (id, filter_type, filter_value, book, question_ids) VALUES (?, ?, ?, ?, ?)",
+            (quiz_id, filter_type, filter_value, book or None, question_ids),
         )
         await db.commit()
     finally:
@@ -85,7 +117,13 @@ async def show_quiz(request: Request, quiz_id: str):
 
     return request.app.state.templates.TemplateResponse(
         "quiz.html",
-        {"request": request, "quiz_id": quiz_id, "questions": questions, "role": quiz["role"]},
+        {
+            "request": request,
+            "quiz_id": quiz_id,
+            "questions": questions,
+            "filter_type": quiz["filter_type"],
+            "filter_value": quiz["filter_value"],
+        },
     )
 
 

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Results — {{ role }}{% endblock %}
+{% block title %}Results — {{ filter_value }}{% endblock %}
 {% block content %}
 <div class="space-y-6">
     <div class="border border-gray-800 rounded-lg p-6 text-center space-y-2">
         <h1 class="text-2xl font-bold">Quiz Results</h1>
-        <p class="text-gray-400">{{ role }}</p>
+        <p class="text-gray-400">{{ filter_value }}</p>
         <div class="text-5xl font-bold {% if pct >= 70 %}text-green-400{% elif pct >= 50 %}text-yellow-400{% else %}text-red-400{% endif %}">
             {{ pct }}%
         </div>

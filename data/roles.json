@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Systems Engineer",
+    "focus": "End-to-end mission design, requirements flow-down, subsystem integration, budgets (mass/power/link), trade studies, verification & validation",
+    "cares_about": "How subsystems interact, system-level trade-offs, requirements traceability, integration risks"
+  },
+  {
+    "name": "AOCS Engineer",
+    "focus": "Attitude determination & control, orbit mechanics, sensors (star trackers, sun sensors, gyros), actuators (reaction wheels, thrusters, magnetorquers), pointing budgets",
+    "cares_about": "Orbital perturbations, control loop stability, pointing accuracy, disturbance torques, mode transitions"
+  },
+  {
+    "name": "Flight Software Engineer",
+    "focus": "Onboard software, real-time embedded systems, FDIR logic, command & telemetry handling, state machines, OBSW lifecycle, C/C++ on radiation-hardened hardware",
+    "cares_about": "Timing constraints, fault tolerance, watchdog design, boot sequences, onboard autonomy, software-hardware interaction"
+  },
+  {
+    "name": "Ground Software Engineer",
+    "focus": "Mission control systems, telemetry processing & archival, command generation & uplink, ground segment automation, ops tooling, data pipelines",
+    "cares_about": "System integration with spacecraft protocols, operational procedures, monitoring & alerting, ground-space interface design"
+  },
+  {
+    "name": "QA Engineer",
+    "focus": "Verification & validation, test campaigns (environmental, functional, EMC), FMEA/FMECA, standards compliance (ECSS, NASA), anomaly tracking, quality gates",
+    "cares_about": "Test coverage, failure modes, margin philosophy, workmanship, traceability from requirements to test results"
+  },
+  {
+    "name": "Project Manager",
+    "focus": "Schedule, cost, risk management, reviews (SRR/PDR/CDR), procurement, team coordination, stakeholder reporting, earned value",
+    "cares_about": "Programmatic trade-offs (cost vs risk vs schedule), review readiness, critical path, make-vs-buy decisions"
+  },
+  {
+    "name": "Thermal Engineer",
+    "focus": "Thermal control system design, heat dissipation, radiators, heaters, MLI, thermal modelling, orbital thermal cycling, eclipse/sunlit analysis",
+    "cares_about": "Temperature limits of components, thermal margins, conduction/radiation paths, worst-case hot/cold scenarios, thermal-structural coupling"
+  },
+  {
+    "name": "Mechanical Engineer",
+    "focus": "Structural design, mechanisms (deployment, release, pointing), vibration & shock analysis, launch loads, materials selection, FEM, mass budgets",
+    "cares_about": "Structural margins of safety, modal analysis, fatigue, mechanism reliability, integration & assembly constraints, CTE matching"
+  },
+  {
+    "name": "RF & Comms Engineer",
+    "focus": "Link budget analysis, antenna design, transponders, modulation & coding, frequency coordination, RF chain (LNA, HPA, filters), ground station interfaces",
+    "cares_about": "Signal-to-noise margins, path loss, interference, bandwidth allocation, regulatory compliance, link availability"
+  }
+]

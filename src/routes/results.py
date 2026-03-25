@@ -68,7 +68,8 @@ async def show_results(request: Request, quiz_id: str):
         {
             "request": request,
             "quiz_id": quiz_id,
-            "role": quiz["role"],
+            "filter_type": quiz["filter_type"],
+            "filter_value": quiz["filter_value"],
             "items": items,
             "total_correct": total_correct,
             "total_answered": total_answered,

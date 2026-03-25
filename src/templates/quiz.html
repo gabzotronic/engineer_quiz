@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Quiz — {{ role }}{% endblock %}
+{% block title %}Quiz — {{ filter_value }}{% endblock %}
 {% block content %}
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold">{{ role }} Quiz</h1>
+        <h1 class="text-2xl font-bold">{{ filter_value }} Quiz</h1>
         <span class="text-gray-400">{{ questions|length }} questions</span>
     </div>
 

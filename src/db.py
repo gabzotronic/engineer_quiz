@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS questions (
 
 CREATE TABLE IF NOT EXISTS quizzes (
     id TEXT PRIMARY KEY,
-    role TEXT NOT NULL,
+    filter_type TEXT NOT NULL DEFAULT 'role',
+    filter_value TEXT NOT NULL,
     book TEXT,
     question_ids TEXT NOT NULL,
     started_at TEXT NOT NULL DEFAULT (datetime('now'))

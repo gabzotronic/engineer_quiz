@@ -12,13 +12,22 @@ router = APIRouter()
 async def home(request: Request):
     db = await get_db()
     try:
-        # Get available books
         cursor = await db.execute("SELECT DISTINCT book FROM questions")
         books = [row["book"] for row in await cursor.fetchall()]
+
+        cursor = await db.execute(
+            "SELECT DISTINCT chapter FROM questions WHERE chapter IS NOT NULL ORDER BY chapter"
+        )
+        chapters = [row["chapter"] for row in await cursor.fetchall()]
     finally:
         await db.close()
 
     return request.app.state.templates.TemplateResponse(
         "home.html",
-        {"request": request, "roles": settings.roles, "books": books},
+        {
+            "request": request,
+            "roles": settings.roles,
+            "books": books,
+            "chapters": chapters,
+        },
     )
