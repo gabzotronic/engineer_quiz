@@ -1,5 +1,6 @@
 import asyncio
 import json
+import random
 from datetime import datetime, UTC
 from uuid import uuid4
 
@@ -12,6 +13,78 @@ from src.models import GradeResult, Question
 from src.openrouter import grade_open_answer
 
 router = APIRouter(prefix="/quiz")
+
+
+def _build_filter_clause(
+    filter_type: str, filter_value: str, book: str
+) -> tuple[str, list]:
+    """Build WHERE clause for question filtering."""
+    clauses = ["difficulty <= 2"]
+    params: list = []
+    if filter_type == "chapter":
+        clauses.append("chapter = ?")
+        params.append(filter_value)
+    else:
+        clauses.append("EXISTS (SELECT 1 FROM json_each(roles) WHERE value = ?)")
+        params.append(filter_value)
+    if book:
+        clauses.append("book = ?")
+        params.append(book)
+    return " AND ".join(clauses), params
+
+
+async def _draw_stratified(
+    db, where: str, params: list, total: int
+) -> list[dict]:
+    """Draw questions with controlled difficulty and type ratios.
+
+    Targets: 30% difficulty-2, 20% open-ended.
+    Falls back to random fill if not enough questions in a bucket.
+    """
+    n_open = max(1, round(total * 0.2))
+    n_mc = total - n_open
+    n_diff2_mc = max(1, round(n_mc * 0.3))
+    n_diff1_mc = n_mc - n_diff2_mc
+    n_diff2_open = max(1, round(n_open * 0.3))
+    n_diff1_open = n_open - n_diff2_open
+
+    buckets = [
+        (1, "mc", n_diff1_mc),
+        (2, "mc", n_diff2_mc),
+        (1, "open", n_diff1_open),
+        (2, "open", n_diff2_open),
+    ]
+
+    picked_ids: set[int] = set()
+    results: list[dict] = []
+
+    for diff, qtype, n in buckets:
+        cursor = await db.execute(
+            f"""SELECT * FROM questions
+                WHERE {where} AND difficulty = ? AND question_type = ?
+                ORDER BY RANDOM() LIMIT ?""",
+            params + [diff, qtype, n],
+        )
+        for row in await cursor.fetchall():
+            if row["id"] not in picked_ids:
+                picked_ids.add(row["id"])
+                results.append(dict(row))
+
+    # Fill remaining slots with any matching questions not yet picked
+    remaining = total - len(results)
+    if remaining > 0:
+        exclude = ",".join("?" * len(picked_ids)) if picked_ids else "NULL"
+        cursor = await db.execute(
+            f"""SELECT * FROM questions
+                WHERE {where} AND id NOT IN ({exclude})
+                ORDER BY RANDOM() LIMIT ?""",
+            params + list(picked_ids) + [remaining],
+        )
+        for row in await cursor.fetchall():
+            results.append(dict(row))
+
+    random.shuffle(results)
+    return results
 
 
 @router.get("/start")
@@ -29,39 +102,8 @@ async def start_quiz(
 
     db = await get_db()
     try:
-        if filter_type == "chapter":
-            if book:
-                cursor = await db.execute(
-                    """SELECT * FROM questions
-                       WHERE chapter = ? AND book = ? AND difficulty <= 2
-                       ORDER BY RANDOM() LIMIT ?""",
-                    (filter_value, book, settings.quiz_size),
-                )
-            else:
-                cursor = await db.execute(
-                    """SELECT * FROM questions
-                       WHERE chapter = ? AND difficulty <= 2
-                       ORDER BY RANDOM() LIMIT ?""",
-                    (filter_value, settings.quiz_size),
-                )
-        else:
-            if book:
-                cursor = await db.execute(
-                    """SELECT * FROM questions
-                       WHERE EXISTS (SELECT 1 FROM json_each(roles) WHERE value = ?)
-                       AND book = ? AND difficulty <= 2
-                       ORDER BY RANDOM() LIMIT ?""",
-                    (filter_value, book, settings.quiz_size),
-                )
-            else:
-                cursor = await db.execute(
-                    """SELECT * FROM questions
-                       WHERE EXISTS (SELECT 1 FROM json_each(roles) WHERE value = ?)
-                       AND difficulty <= 2
-                       ORDER BY RANDOM() LIMIT ?""",
-                    (filter_value, settings.quiz_size),
-                )
-        rows = await cursor.fetchall()
+        where, params = _build_filter_clause(filter_type, filter_value, book)
+        rows = await _draw_stratified(db, where, params, settings.quiz_size)
 
         if not rows:
             cursor = await db.execute(
