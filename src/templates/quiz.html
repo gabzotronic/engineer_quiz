@@ -82,13 +82,24 @@
     var countSpan = document.getElementById('tab-count');
     var pluralSpan = document.getElementById('tab-plural');
 
+    function recordSwitch() {
+        count++;
+        hiddenField.value = count;
+        countSpan.textContent = count;
+        pluralSpan.textContent = count === 1 ? '' : 's';
+        warning.classList.remove('hidden');
+    }
+
     document.addEventListener('visibilitychange', function() {
         if (document.hidden) {
-            count++;
-            hiddenField.value = count;
-            countSpan.textContent = count;
-            pluralSpan.textContent = count === 1 ? '' : 's';
-            warning.classList.remove('hidden');
+            recordSwitch();
+        }
+    });
+
+    window.addEventListener('blur', function() {
+        // Only count if tab is still visible (otherwise visibilitychange already counted it)
+        if (!document.hidden) {
+            recordSwitch();
         }
     });
 

@@ -194,7 +194,7 @@ async def submit_quiz(request: Request, quiz_id: str):
             else:
                 score = grade.score if grade else None
                 feedback = grade.feedback if grade else "No grading available (API key not configured)"
-                is_correct = 1 if score and score >= 0.7 else (0 if score is not None else None)
+                is_correct = 1 if score and score >= 0.5 else (0 if score is not None else None)
                 await db.execute(
                     """INSERT INTO quiz_results (quiz_id, question_id, user_answer, is_correct, score, feedback, graded_at)
                        VALUES (?, ?, ?, ?, ?, ?, ?)""",
