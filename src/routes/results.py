@@ -62,6 +62,7 @@ async def show_results(request: Request, quiz_id: str):
         await db.close()
 
     pct = round(total_correct / total_answered * 100) if total_answered else 0
+    tab_switches = quiz["tab_switches"] if "tab_switches" in quiz.keys() else 0
 
     return request.app.state.templates.TemplateResponse(
         "results.html",
@@ -74,5 +75,6 @@ async def show_results(request: Request, quiz_id: str):
             "total_correct": total_correct,
             "total_answered": total_answered,
             "pct": pct,
+            "tab_switches": tab_switches or 0,
         },
     )

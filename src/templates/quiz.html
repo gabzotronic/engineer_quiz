@@ -2,12 +2,24 @@
 {% block title %}Quiz — {{ filter_value }}{% endblock %}
 {% block content %}
 <div class="space-y-6">
+    <!-- Anti-cheat notice -->
+    <div class="border border-yellow-800/50 bg-yellow-950/30 rounded-lg px-4 py-3 text-sm text-yellow-300">
+        This is a graded test. Do not switch tabs or use external resources. Tab switches are recorded.
+    </div>
+
+    <!-- Tab-switch warning (hidden by default, shown after first switch) -->
+    <div id="tab-warning" class="hidden border border-red-800/50 bg-red-950/30 rounded-lg px-4 py-3 text-sm text-red-300 font-medium">
+        You left this tab. This has been recorded. (<span id="tab-count">0</span> time<span id="tab-plural">s</span>)
+    </div>
+
     <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">{{ filter_value }} Quiz</h1>
         <span class="text-gray-400">{{ questions|length }} questions</span>
     </div>
 
     <form action="/quiz/{{ quiz_id }}/submit" method="POST" class="space-y-6" id="quiz-form">
+        <input type="hidden" name="tab_switches" id="tab-switches" value="0">
+
         {% for q in questions %}
         <div class="border border-gray-800 rounded-lg p-6 space-y-4">
             <div class="flex items-start gap-3">
@@ -25,14 +37,15 @@
                         {% endif %}
                         <span class="text-xs text-gray-500">{{ q.question_type|upper }}</span>
                     </div>
-                    <p class="text-gray-100 leading-relaxed">{{ q.question_text }}</p>
+                    <!-- user-select: none on question text to deter copy-paste -->
+                    <p class="text-gray-100 leading-relaxed" style="user-select: none; -webkit-user-select: none;">{{ q.question_text }}</p>
                 </div>
             </div>
 
             {% if q.question_type == "mc" and q.options %}
             <div class="ml-11 space-y-2">
                 {% for opt in q.options %}
-                <label class="flex items-start gap-3 cursor-pointer group">
+                <label class="flex items-start gap-3 cursor-pointer group" style="user-select: none; -webkit-user-select: none;">
                     <input type="radio" name="q_{{ q.id }}" value="{{ opt[0] }}"
                            class="mt-1 accent-blue-500">
                     <span class="text-gray-300 group-hover:text-gray-100 transition">{{ opt }}</span>
@@ -61,8 +74,33 @@
 </div>
 
 <script>
+// Anti-cheat: track tab switches via Page Visibility API
+(function() {
+    var count = 0;
+    var hiddenField = document.getElementById('tab-switches');
+    var warning = document.getElementById('tab-warning');
+    var countSpan = document.getElementById('tab-count');
+    var pluralSpan = document.getElementById('tab-plural');
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            count++;
+            hiddenField.value = count;
+            countSpan.textContent = count;
+            pluralSpan.textContent = count === 1 ? '' : 's';
+            warning.classList.remove('hidden');
+        }
+    });
+
+    // Disable right-click context menu on quiz form
+    document.getElementById('quiz-form').addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+})();
+
+// Disable submit button after click to prevent double-submit
 document.getElementById('quiz-form').addEventListener('submit', function() {
-    const btn = document.getElementById('submit-btn');
+    var btn = document.getElementById('submit-btn');
     btn.disabled = true;
     btn.textContent = 'Grading...';
     btn.classList.add('opacity-50');

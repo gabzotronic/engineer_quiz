@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS quizzes (
     filter_value TEXT NOT NULL,
     book TEXT,
     question_ids TEXT NOT NULL,
+    tab_switches INTEGER NOT NULL DEFAULT 0,
     started_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -44,6 +45,13 @@ async def init_db() -> None:
     async with aiosqlite.connect(settings.database_path) as db:
         await db.execute("PRAGMA journal_mode=WAL")
         await db.executescript(SCHEMA)
+        # Migration: add tab_switches column to existing quizzes tables
+        cursor = await db.execute("PRAGMA table_info(quizzes)")
+        columns = {row[1] for row in await cursor.fetchall()}
+        if "tab_switches" not in columns:
+            await db.execute(
+                "ALTER TABLE quizzes ADD COLUMN tab_switches INTEGER NOT NULL DEFAULT 0"
+            )
         await db.commit()
 
 

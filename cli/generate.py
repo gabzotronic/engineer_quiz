@@ -27,9 +27,11 @@ def format_roles_for_prompt(roles: list[dict]) -> str:
         lines.append(f"- {r['name']}: focuses on {r['focus']}. Cares about: {r['cares_about']}")
     return "\n".join(lines)
 
-GENERATION_PROMPT = """You are creating quiz questions for satellite engineers studying "{book_title}", {chapter}.
+GENERATION_PROMPT = """You are creating quiz questions for NEW HIRES at a satellite company studying "{book_title}", {chapter}.
 
-The purpose of this quiz is to test whether engineers truly understand satellite engineering concepts, reasoning, and trade-offs — NOT to test rote memorisation of facts, definitions, or numerical values.
+Target audience: fresh graduates with a generic engineering degree (mechanical, electrical, aerospace, software). They have NO prior space industry experience and NO specialised satellite knowledge. They have read the source material but are encountering these concepts for the first time.
+
+The purpose is to test conceptual understanding — whether the reader grasped the key ideas, reasoning, and principles from the text. NOT to test memorisation, jargon fluency, or industry experience.
 
 Source text:
 ---
@@ -40,13 +42,17 @@ Generate exactly {n_questions} questions from this text.
 - Create {n_mc} multiple-choice questions and {n_open} open-ended questions.
 - Tag each question with the most relevant engineer roles from the list below. Consider each role's focus area when deciding relevance:
 {roles_block}
-- Assign difficulty: 1 (conceptual understanding), 2 (application/trade-off analysis), 3 (cross-domain synthesis)
+- Assign difficulty: 1 (conceptual understanding — "why does this matter?") or 2 (simple application — "what would you consider?")
+- Target 70% difficulty 1 and 30% difficulty 2. Do NOT use difficulty 3.
 
 Question style guidelines:
+- Questions must be answerable by someone who has carefully read the source text — no prior domain experience needed.
+- DO NOT ask about standards, specifications, or frameworks (ISO, ECSS, MIL-STD, IEEE, INCOSE definitions, etc.). This quiz tests understanding of concepts, not knowledge of standards.
 - DO NOT ask for definitions ("What is X?"), specific numerical values, or facts that can simply be looked up.
-- Questions should require the engineer to demonstrate understanding of WHY something works the way it does, what trade-offs are involved, or what would happen under different conditions.
-- For multiple-choice: provide exactly 4 options (A-D). Each wrong option should be plausible enough that reasoning is needed to eliminate it — not obviously wrong. Mark the correct letter and explain the reasoning.
-- For open-ended: provide a model answer (3-5 sentences) that outlines the reasoning chain, key concepts, and trade-offs the answer should demonstrate. Focus on WHY, not just WHAT.
+- DO NOT use heavy jargon or assume familiarity with specific spacecraft subsystems beyond what the source text explains.
+- Questions should test whether the reader understood WHY something works the way it does, what the key principles are, or what would happen under different conditions.
+- For multiple-choice: provide exactly 4 options (A-D). Wrong options should be plausible but distinguishable through careful reasoning — not requiring years of experience to eliminate.
+- For open-ended: provide a model answer (2-3 sentences) that outlines the key reasoning. Focus on WHY, not just WHAT.
 
 If the source text is too short, contains mostly figures/tables references, or is not suitable for questions, return an empty array [].
 
@@ -54,7 +60,7 @@ Respond ONLY with a JSON array (no markdown, no code fences):
 [
   {{
     "question_type": "mc",
-    "difficulty": 2,
+    "difficulty": 1,
     "roles": ["Systems Engineer", "AOCS Engineer"],
     "question_text": "...",
     "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
@@ -63,11 +69,11 @@ Respond ONLY with a JSON array (no markdown, no code fences):
   }},
   {{
     "question_type": "open",
-    "difficulty": 3,
+    "difficulty": 2,
     "roles": ["Project Manager"],
     "question_text": "...",
-    "correct_answer": "Model answer explaining the reasoning chain and key concepts...",
-    "explanation": "Key concepts and trade-offs the answer should demonstrate: ..."
+    "correct_answer": "Model answer explaining the key reasoning...",
+    "explanation": "Key concepts the answer should demonstrate: ..."
   }}
 ]"""
 
@@ -108,7 +114,7 @@ async def generate_for_chunk(
     n_questions: int = 5,
     semaphore: asyncio.Semaphore | None = None,
 ) -> list[dict]:
-    n_mc = round(n_questions * 0.7)
+    n_mc = round(n_questions * 0.9)
     n_open = n_questions - n_mc
 
     prompt = GENERATION_PROMPT.format(

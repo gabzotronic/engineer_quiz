@@ -33,14 +33,14 @@ async def start_quiz(
             if book:
                 cursor = await db.execute(
                     """SELECT * FROM questions
-                       WHERE chapter = ? AND book = ?
+                       WHERE chapter = ? AND book = ? AND difficulty <= 2
                        ORDER BY RANDOM() LIMIT ?""",
                     (filter_value, book, settings.quiz_size),
                 )
             else:
                 cursor = await db.execute(
                     """SELECT * FROM questions
-                       WHERE chapter = ?
+                       WHERE chapter = ? AND difficulty <= 2
                        ORDER BY RANDOM() LIMIT ?""",
                     (filter_value, settings.quiz_size),
                 )
@@ -49,7 +49,7 @@ async def start_quiz(
                 cursor = await db.execute(
                     """SELECT * FROM questions
                        WHERE EXISTS (SELECT 1 FROM json_each(roles) WHERE value = ?)
-                       AND book = ?
+                       AND book = ? AND difficulty <= 2
                        ORDER BY RANDOM() LIMIT ?""",
                     (filter_value, book, settings.quiz_size),
                 )
@@ -57,6 +57,7 @@ async def start_quiz(
                 cursor = await db.execute(
                     """SELECT * FROM questions
                        WHERE EXISTS (SELECT 1 FROM json_each(roles) WHERE value = ?)
+                       AND difficulty <= 2
                        ORDER BY RANDOM() LIMIT ?""",
                     (filter_value, settings.quiz_size),
                 )
@@ -199,6 +200,13 @@ async def submit_quiz(request: Request, quiz_id: str):
                        VALUES (?, ?, ?, ?, ?, ?, ?)""",
                     (quiz_id, qid, user_answer, is_correct, score, feedback, now),
                 )
+
+        # Store tab-switch count from anti-cheat JS
+        tab_switches = int(form.get("tab_switches", 0) or 0)
+        await db.execute(
+            "UPDATE quizzes SET tab_switches = ? WHERE id = ?",
+            (tab_switches, quiz_id),
+        )
 
         await db.commit()
     finally:
