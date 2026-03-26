@@ -1,4 +1,4 @@
-.PHONY: run install probe extract generate test format
+.PHONY: run install probe extract generate extract-smad generate-smad test format
 
 run:
 	poetry run uvicorn src.app:app --reload --host 0.0.0.0 --port 8000
@@ -13,7 +13,15 @@ extract:
 	poetry run python -m cli.extract extract --pdf books/fundamentals_of_space_systems.pdf
 
 generate:
-	poetry run python -m cli.generate --book "Fundamentals of Space Systems"
+	poetry run python -m cli.generate generate --chunks-file chunks.json
+
+extract-smad:
+	poetry run python -m cli.extract extract \
+		--pdf "books/Space Mission Analysis and Design (J. R. Wertz, W. J. Larson) (z-library.sk, 1lib.sk, z-lib.sk).pdf" \
+		--output chunks_smad.json
+
+generate-smad:
+	poetry run python -m cli.generate generate --chunks-file chunks_smad.json
 
 test:
 	poetry run pytest tests/ -v
