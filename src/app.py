@@ -1,3 +1,4 @@
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -30,6 +31,17 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Engineer Quiz", lifespan=lifespan)
 
 app.state.templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+
+
+def _slugify(value: str) -> str:
+    """Convert a string to a URL-safe slug."""
+    s = value.lower().strip()
+    s = re.sub(r"[^\w\s-]", "", s)
+    s = re.sub(r"[-\s]+", "-", s)
+    return s.strip("-")
+
+
+app.state.templates.env.filters["slugify"] = _slugify
 
 static_dir = BASE_DIR / "static"
 if static_dir.exists():

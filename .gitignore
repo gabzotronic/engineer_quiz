@@ -2,8 +2,11 @@ __pycache__/
 *.pyc
 .env
 quiz.db
+test_e2e.db
 chunks.json
+chunks_smad.json
 books/
+src/static/diagrams/
 *.egg-info/
 dist/
 .venv/

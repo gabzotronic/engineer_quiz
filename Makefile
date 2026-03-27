@@ -1,4 +1,4 @@
-.PHONY: run install probe extract generate extract-smad generate-smad test format
+.PHONY: run install probe extract generate extract-smad generate-smad extract-exam test test-e2e format
 
 run:
 	poetry run uvicorn src.app:app --reload --host 0.0.0.0 --port 8000
@@ -22,6 +22,14 @@ extract-smad:
 
 generate-smad:
 	poetry run python -m cli.generate generate --chunks-file chunks_smad.json
+
+extract-exam:
+	poetry run python -m cli.extract_exam extract \
+		--pdf "books/E-Math - Sec 4 - Prelims Exam Paper - 2024 - ACS Barker.pdf"
+
+test-e2e:
+	poetry run playwright install chromium
+	poetry run pytest tests/test_e2e_math.py -v -o "addopts="
 
 test:
 	poetry run pytest tests/ -v

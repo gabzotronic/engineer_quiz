@@ -253,7 +253,8 @@ async def export_questions_json(db_path: str) -> None:
         db.row_factory = aiosqlite.Row
         cursor = await db.execute(
             "SELECT book, chapter, chunk_hash, question_type, difficulty, roles, "
-            "question_text, options, correct_answer, explanation FROM questions ORDER BY id"
+            "question_text, options, correct_answer, explanation, "
+            "diagram_images, math_metadata FROM questions ORDER BY id"
         )
         rows = await cursor.fetchall()
 
@@ -262,6 +263,8 @@ async def export_questions_json(db_path: str) -> None:
         q = dict(r)
         q["roles"] = json.loads(q["roles"])
         q["options"] = json.loads(q["options"]) if q["options"] else None
+        q["diagram_images"] = json.loads(q["diagram_images"]) if q.get("diagram_images") else None
+        q["math_metadata"] = json.loads(q["math_metadata"]) if q.get("math_metadata") else None
         questions.append(q)
 
     out = data_dir / "questions.json"

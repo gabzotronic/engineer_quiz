@@ -25,8 +25,9 @@ async def seed() -> None:
         for q in questions:
             await db.execute(
                 """INSERT INTO questions (book, chapter, question_type, difficulty, roles,
-                   question_text, options, correct_answer, explanation)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   question_text, options, correct_answer, explanation,
+                   diagram_images, math_metadata)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     q["book"],
                     q.get("chapter"),
@@ -37,6 +38,8 @@ async def seed() -> None:
                     json.dumps(q["options"]) if q.get("options") else None,
                     q["correct_answer"],
                     q.get("explanation"),
+                    json.dumps(q["diagram_images"]) if q.get("diagram_images") else None,
+                    json.dumps(q["math_metadata"]) if q.get("math_metadata") else None,
                 ),
             )
         await db.commit()

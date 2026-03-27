@@ -9,6 +9,7 @@ from fastapi.responses import RedirectResponse
 
 from src.config import settings
 from src.db import get_db
+from src.math_grader import grade_math_answer
 from src.models import GradeResult, Question
 from src.openrouter import grade_open_answer
 
@@ -53,6 +54,8 @@ async def _draw_stratified(
         (2, "mc", n_diff2_mc),
         (1, "open", n_diff1_open),
         (2, "open", n_diff2_open),
+        (1, "math", n_diff1_open),
+        (2, "math", n_diff2_open),
     ]
 
     picked_ids: set[int] = set()
@@ -73,12 +76,18 @@ async def _draw_stratified(
     # Fill remaining slots with any matching questions not yet picked
     remaining = total - len(results)
     if remaining > 0:
-        exclude = ",".join("?" * len(picked_ids)) if picked_ids else "NULL"
+        if picked_ids:
+            exclude = ",".join("?" * len(picked_ids))
+            exclude_clause = f"AND id NOT IN ({exclude})"
+            exclude_params = list(picked_ids)
+        else:
+            exclude_clause = ""
+            exclude_params = []
         cursor = await db.execute(
             f"""SELECT * FROM questions
-                WHERE {where} AND id NOT IN ({exclude})
+                WHERE {where} {exclude_clause}
                 ORDER BY RANDOM() LIMIT ?""",
-            params + list(picked_ids) + [remaining],
+            params + exclude_params + [remaining],
         )
         for row in await cursor.fetchall():
             results.append(dict(row))
@@ -199,7 +208,10 @@ async def submit_quiz(request: Request, quiz_id: str):
             user_answer = form.get(f"q_{qid}", "").strip()
             answers.append((qid, user_answer, q))
 
-            if q.question_type == "open" and user_answer and settings.openrouter_api_key:
+            if q.question_type == "math" and q.math_metadata and user_answer:
+                # Sympy grading — synchronous, wrap in None placeholder
+                grading_tasks.append(None)
+            elif q.question_type == "open" and user_answer and settings.openrouter_api_key:
                 grading_tasks.append(
                     grade_open_answer(q.question_text, q.correct_answer, user_answer)
                 )
@@ -223,6 +235,12 @@ async def submit_quiz(request: Request, quiz_id: str):
                 else:
                     grading_results.append(result)
 
+        # Grade math questions synchronously (sympy, no async needed)
+        math_grades: dict[int, GradeResult] = {}
+        for qid, user_answer, q in answers:
+            if q.question_type == "math" and q.math_metadata and user_answer:
+                math_grades[qid] = grade_math_answer(user_answer, q.math_metadata)
+
         # Store results
         now = datetime.now(UTC).isoformat()
         for (qid, user_answer, q), grade in zip(answers, grading_results):
@@ -232,6 +250,14 @@ async def submit_quiz(request: Request, quiz_id: str):
                     """INSERT INTO quiz_results (quiz_id, question_id, user_answer, is_correct, graded_at)
                        VALUES (?, ?, ?, ?, ?)""",
                     (quiz_id, qid, user_answer, is_correct, now),
+                )
+            elif q.question_type == "math" and qid in math_grades:
+                mg = math_grades[qid]
+                is_correct = 1 if mg.score >= 0.5 else 0
+                await db.execute(
+                    """INSERT INTO quiz_results (quiz_id, question_id, user_answer, is_correct, score, feedback, graded_at)
+                       VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                    (quiz_id, qid, user_answer, is_correct, mg.score, mg.feedback, now),
                 )
             else:
                 score = grade.score if grade else None

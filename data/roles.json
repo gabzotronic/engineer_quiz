@@ -43,5 +43,10 @@
     "name": "RF & Comms Engineer",
     "focus": "Link budget analysis, antenna design, transponders, modulation & coding, frequency coordination, RF chain (LNA, HPA, filters), ground station interfaces",
     "cares_about": "Signal-to-noise margins, path loss, interference, bandwidth allocation, regulatory compliance, link availability"
+  },
+  {
+    "name": "Math Student",
+    "focus": "Secondary school mathematics — algebra, geometry, trigonometry, statistics, calculus fundamentals",
+    "cares_about": "Numerical computation, algebraic manipulation, geometric reasoning, graph interpretation, problem-solving method"
   }
 ]
